@@ -4,9 +4,9 @@ Cloud Formation Template for creating Kinesis Firehose for storing the Stream
 
 **Prerequisites**
 - Download the [TransformSourceRecordswithAWSLambda.zip](https://github.com/SatishNaidi/CF-Kinesis-Data-Firehose/blob/master/TransformSourceRecordswithAWSLambda.zip "TransformSourceRecordswithAWSLambda.zip") from this repository to local machine
-- Create a S3 Bucket by using either AWS Console or following command, make sure the bucket name is unique.
+- Create a S3 Bucket by using either AWS Console or following command, make sure the bucket name is unique.  
 `aws s3 mb s3://<bucket-name>`
-- Upload the previously dowloaded file to s3 bucket using console or using following command
+- Upload the previously dowloaded file to s3 bucket using console or using following command.  
 `aws s3 cp <absolutepath>/TransformSourceRecordswithAWSLambda.zip s3://<bucket-name>`
 
 
