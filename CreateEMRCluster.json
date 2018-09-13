@@ -1,12 +1,17 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "CloudFormation Template to provision an EMR Cluster",
-  "Metadata" : {
-    "AWS::CloudFormation::Interface" : {
-      "ParameterGroups" : [
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
         {
-          "Label" : { "default" : "Subnet and KeyPair Config" },
-          "Parameters" : [ "SubnetID","SSHKeyName"]
+          "Label": {
+            "default": "Subnet and KeyPair Config"
+          },
+          "Parameters": [
+            "SubnetID",
+            "SSHKeyName"
+          ]
         }
       ]
     }
@@ -51,7 +56,9 @@
           "Ec2SubnetId": {
             "Ref": "SubnetID"
           },
-          "Ec2KeyName": {"Ref":"SSHKeyName"}
+          "Ec2KeyName": {
+            "Ref": "SSHKeyName"
+          }
         },
         "Name": "EMRCluster",
         "JobFlowRole": "EMR_EC2_DefaultRole",
