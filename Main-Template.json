@@ -6,6 +6,15 @@
       "ParameterGroups": [
         {
           "Label": {
+            "default": "Common Parameters Selection"
+          },
+          "Parameters": [
+            "VPCID",
+            "SubnetID"
+          ]
+        },
+        {
+          "Label": {
             "default": "Kinesis firehose setup"
           },
           "Parameters": [
@@ -18,14 +27,39 @@
             "default": "EMR Cluster Parameters"
           },
           "Parameters": [
-            "SubnetID",
             "SSHKeyName"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Elastic Search Parameters"
+          },
+          "Parameters": [
+            "DomainName",
+            "InstanceType",
+            "ElasticsearchVersion"
           ]
         }
       ]
     }
   },
   "Parameters": {
+    "DomainName" : {
+      "Description" : "User defined Elasticsearch Domain name",
+      "Type" : "String"
+    },
+    "ElasticsearchVersion" : {
+      "Description" : "User defined Elasticsearch Version",
+      "Type" : "String",
+      "Default":"6.3"
+    },
+    "InstanceType" : {
+      "Type" : "String",
+      "Default": "t2.small.elasticsearch"
+    },
+    "VPCID" : {
+      "Type": "AWS::EC2::VPC::Id"
+    },
     "BucketForLambdaCode": {
       "Description": "Select the bucket name where the lamdba fucntion code resides",
       "Default": "lambda-code-bucket-us-west-2",
@@ -43,7 +77,7 @@
       "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
     },
     "SubnetID": {
-      "Description": "Select One of the available Subnet from Drop down list",
+      "Description": "Select One of the available Subnet from Drop down list, Will be used for EMR and Elastic search",
       "Type": "AWS::EC2::Subnet::Id"
     }
   },
@@ -439,6 +473,68 @@
           }
         ]
       }
+    },
+    "ElasticsearchDomain": {
+      "Type": "AWS::Elasticsearch::Domain",
+      "Properties": {
+        "DomainName": { "Ref": "DomainName" },
+        "ElasticsearchVersion": { "Ref": "ElasticsearchVersion" },
+        "ElasticsearchClusterConfig": {
+          "InstanceCount": "1",
+          "InstanceType": { "Ref": "InstanceType" }
+        },
+        "EBSOptions": {
+          "EBSEnabled" : "true",
+          "Iops" : 0,
+          "VolumeSize" : 10,
+          "VolumeType" : "standard"
+        },
+        "SnapshotOptions": {
+          "AutomatedSnapshotStartHour": "0"
+        },
+        "AccessPolicies": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Deny",
+            "Principal": {
+              "AWS": "*"
+            },
+            "Action": "es:*",
+            "Resource": "*"
+          }]
+        },
+        "AdvancedOptions": {
+          "rest.action.multi.allow_explicit_index": "true"
+        },
+        "Tags": [{
+          "Key": "foo",
+          "Value": "bar"
+        }],
+        "VPCOptions" : {
+          "SubnetIds" : [
+            {"Ref" : "SubnetID"}
+          ],
+          "SecurityGroupIds" : [
+            {"Ref" : "mySecurityGroup"}
+          ]
+        }
+      }
+    },
+    "mySecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "elastic-search1",
+        "VpcId" : {"Ref" : "VPCID"},
+        "GroupName": "elastic-search1",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "443",
+            "IpProtocol": "tcp",
+            "ToPort": "443",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
     }
   },
   "Outputs": {
@@ -488,6 +584,21 @@
       "Description": "EMRDefaultRole",
       "Value": {
         "Ref": "EMRDefaultRole"
+      }
+    },
+    "DomainArn": {
+      "Value": {
+        "Fn::GetAtt": ["ElasticsearchDomain", "DomainArn"]
+      }
+    },
+    "DomainEndpoint": {
+      "Value": {
+        "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"]
+      }
+    },
+    "SecurityGroupId": {
+      "Value": {
+        "Ref": "mySecurityGroup"
       }
     }
   }
