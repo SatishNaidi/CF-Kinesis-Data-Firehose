@@ -523,9 +523,8 @@
     "mySecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "elastic-search1",
+        "GroupDescription": "elastic-search security group",
         "VpcId" : {"Ref" : "VPCID"},
-        "GroupName": "elastic-search1",
         "SecurityGroupIngress": [
           {
             "FromPort": "443",
